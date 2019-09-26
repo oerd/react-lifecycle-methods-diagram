@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 
 import { isReactVersion } from './propTypes';
@@ -8,54 +8,35 @@ const diagramVersions = {
   16.4: import('./versions/16.4'),
 };
 
-export default class Diagram extends Component {
-  static propTypes = {
-    advanced: PropTypes.bool,
-    reactVersion: isReactVersion.isRequired,
-  };
+export default function Diagram({ advanced, reactVersion }) {
+  const [diagramElements, setDiagramElements] = useState();
 
-  state = {
-    diagramElements: null,
-  };
-
-  componentDidMount() {
-    this.loadDiagramElements();
+  function loadDiagramElements() {
+    diagramVersions[reactVersion].then(setDiagramElements);
   }
 
-  componentDidUpdate(prevProps) {
-    const { reactVersion } = this.props;
+  useEffect(loadDiagramElements, [reactVersion]);
 
-    if (reactVersion !== prevProps.reactVersion) {
-      this.loadDiagramElements();
-    }
+
+  if (!diagramElements) {
+    return null;
   }
 
-  async loadDiagramElements() {
-    const { reactVersion } = this.props;
-    const diagramElements = await diagramVersions[reactVersion];
+  const { Mounting, Updating, Unmounting } = diagramElements;
 
-    this.setState({ diagramElements });
-  }
-
-  render() {
-    const { advanced } = this.props;
-    const { diagramElements } = this.state;
-
-    if (!diagramElements) {
-      return null;
-    }
-
-    const { Mounting, Updating, Unmounting } = diagramElements;
-
-    return (
-      <>
-        <h2 className="hidden">
-          Component lifecycle
-        </h2>
-        <Mounting advanced={advanced} />
-        <Updating advanced={advanced} />
-        <Unmounting advanced={advanced} />
-      </>
-    );
-  }
+  return (
+    <>
+      <h2 className="hidden">
+        Component lifecycle
+      </h2>
+      <Mounting advanced={advanced} />
+      <Updating advanced={advanced} />
+      <Unmounting advanced={advanced} />
+    </>
+  );
 }
+
+Diagram.propTypes = {
+  advanced: PropTypes.bool,
+  reactVersion: isReactVersion.isRequired,
+};

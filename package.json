@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "description": "Interactive React lifecycle methods diagram.",
   "scripts": {
-    "build": "parcel build src/index.html --public-url ./",
+    "build": "parcel build src/index.html --public-url ./ --no-source-maps",
     "clean": "rimraf dist",
+    "lint": "eslint src/ --ext .jsx,.js",
     "start": "parcel src/index.html",
-    "test": "yarn run test-eslint",
-    "test-eslint": "eslint src/ --ext .jsx,.js"
+    "test": "yarn lint"
   },
   "author": {
     "name": "Wojciech Maj",
@@ -82,30 +82,35 @@
     {
       "name": "Mohamad Shiralizadeh",
       "email": "mohamad.shir@gmail.com"
+    },
+    {
+      "name": "Artur Basak",
+      "email": "artur.basak.devingrodno@gmail.com"
     }
   ],
   "license": "MIT",
   "dependencies": {
-    "@babel/polyfill": "^7.0.0",
-    "get-user-locale": "^1.1.1",
+    "core-js": "3",
+    "country-code-to-flag-emoji": "^1.0.0",
+    "get-user-locale": "^1.2.0",
     "lodash.once": "^4.1.1",
     "merge-class-names": "^1.1.1",
     "prop-types": "^15.6.2",
-    "react": "^16.7.0",
-    "react-dom": "^16.7.0"
+    "react": "^16.8.0",
+    "react-dom": "^16.8.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.2.2",
-    "@babel/plugin-proposal-class-properties": "^7.2.3",
+    "@babel/core": "^7.5.5",
     "@babel/plugin-proposal-export-default-from": "^7.2.0",
-    "babel-eslint": "^10.0.1",
-    "eslint": "^5.11.1",
-    "eslint-config-airbnb": "^17.1.0",
-    "eslint-plugin-import": "^2.14.0",
-    "eslint-plugin-jsx-a11y": "^6.1.2",
-    "eslint-plugin-react": "^7.12.0",
+    "babel-eslint": "^10.0.0",
+    "eslint": "^6.1.0",
+    "eslint-config-airbnb": "^18.0.0",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-jsx-a11y": "^6.2.3",
+    "eslint-plugin-react": "^7.14.3",
+    "eslint-plugin-react-hooks": "^1.7.0",
     "less": "^3.9.0",
-    "parcel-bundler": "^1.11.0",
+    "parcel-bundler": "1.12.2",
     "rimraf": "^2.6.2"
   }
 }

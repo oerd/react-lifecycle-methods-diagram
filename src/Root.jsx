@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import T from './i18n';
 
@@ -14,7 +14,7 @@ import { getMatchingLocale } from './i18n/i18n';
  * after each rerender. Seems like Chrome can't figure out proper sizes until
  * we give it width explicitly.
  */
-const fixChromeGridSizingBug = (ref) => {
+function fixChromeGridSizingBug(ref) {
   if (!ref) { return; }
   requestAnimationFrame(() => {
     /* eslint-disable no-param-reassign */
@@ -23,45 +23,47 @@ const fixChromeGridSizingBug = (ref) => {
       ref.style.width = null;
     });
   });
-};
+}
 
-const getLocalStorage = (key, defaultValue) => (
-  localStorage && localStorage[key]
-    ? localStorage[key]
-    : defaultValue
-);
+function getLocalStorage(key, defaultValue) {
+  return (
+    localStorage && localStorage[key]
+      ? localStorage[key]
+      : defaultValue
+  );
+}
 
-const getLocalStorageFlag = (key, defaultValue) => getLocalStorage(key, defaultValue) === 'true';
+function getLocalStorageFlag(key, defaultValue) {
+  return getLocalStorage(key, defaultValue) === 'true';
+}
 
-const latestReactVersion = [...supportedReactVersions].pop();
+const latestReactVersion = supportedReactVersions[supportedReactVersions.length - 1];
 
 const userLocale = getLocalStorage('locale', getMatchingLocale());
 
 document.documentElement.setAttribute('lang', userLocale);
-export default class Root extends Component {
-  state = {
-    advanced: getLocalStorageFlag('showAdvanced', 'false'),
-    locale: userLocale,
-    reactVersion: getLocalStorage('reactVersion', latestReactVersion),
-  };
 
-  toggleAdvanced = () => this.setState(prevState => ({
-    advanced: !prevState.advanced,
-  }), this.saveSettings);
+export default function Root() {
+  const [advanced, setAdvanced] = useState(getLocalStorageFlag('showAdvanced', 'false'));
+  const [locale, setLocale] = useState(userLocale);
+  const [reactVersion, setReactVersion] = useState(getLocalStorage('reactVersion', latestReactVersion));
 
-  toggleLocale = (event) => {
+  function toggleAdvanced() {
+    setAdvanced(prevAdvanced => !prevAdvanced);
+  }
+
+  function toggleLocale(event) {
     const { value } = event.target;
     document.documentElement.setAttribute('lang', value);
-    this.setState({ locale: value }, this.saveSettings);
+    setLocale(value);
   }
 
-  toggleReactVersion = (event) => {
+  function toggleReactVersion(event) {
     const { value } = event.target;
-    this.setState({ reactVersion: value }, this.saveSettings);
+    setReactVersion(value);
   }
 
-  saveSettings = () => {
-    const { advanced, locale, reactVersion } = this.state;
+  useEffect(() => {
     try {
       localStorage.showAdvanced = advanced;
       localStorage.locale = locale;
@@ -70,29 +72,25 @@ export default class Root extends Component {
       // eslint-disable-next-line no-console
       console.error('Failed to safe settings.');
     }
-  }
+  }, [advanced, locale, reactVersion]);
 
-  render() {
-    const { advanced, locale, reactVersion } = this.state;
-
-    return (
-      <div ref={ref => fixChromeGridSizingBug(ref)}>
-        <h1>
-          <T>
-            React lifecycle methods diagram
-          </T>
-        </h1>
-        <Options
-          advanced={advanced}
-          locale={locale}
-          reactVersion={reactVersion}
-          toggleAdvanced={this.toggleAdvanced}
-          toggleLocale={this.toggleLocale}
-          toggleReactVersion={this.toggleReactVersion}
-        />
-        <DiagramWithLegend advanced={advanced} reactVersion={reactVersion} />
-        <Footer />
-      </div>
-    );
-  }
+  return (
+    <div ref={fixChromeGridSizingBug}>
+      <h1>
+        <T>
+          React lifecycle methods diagram
+        </T>
+      </h1>
+      <Options
+        advanced={advanced}
+        locale={locale}
+        reactVersion={reactVersion}
+        toggleAdvanced={toggleAdvanced}
+        toggleLocale={toggleLocale}
+        toggleReactVersion={toggleReactVersion}
+      />
+      <DiagramWithLegend advanced={advanced} reactVersion={reactVersion} />
+      <Footer />
+    </div>
+  );
 }

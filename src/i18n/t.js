@@ -1,38 +1,41 @@
-import '@babel/polyfill';
 import { defaultLocale, getMatchingLocale, languageFiles } from './i18n';
 
-export default async (string, args, locale) => {
-  if (!args) {
-    // eslint-disable-next-line no-param-reassign
-    args = {};
+function getTranslatedString(string, locale) {
+  if (locale === defaultLocale || !languageFiles[locale]) {
+    return Promise.resolve(string);
   }
 
+  return languageFiles[locale]
+    .then((languageFile) => {
+      if (typeof languageFile[string] === 'string') {
+        return languageFile[string];
+      }
+
+      return string;
+    })
+    .catch(() => {
+      // eslint-disable-next-line no-console
+      console.error(`Unable to load locale: ${locale}`);
+      return string;
+    });
+}
+
+export default function t(string, args, locale) {
   if (!locale) {
     // eslint-disable-next-line no-param-reassign
     locale = getMatchingLocale();
   }
 
-  const getTranslatedString = async () => {
-    if (locale !== defaultLocale) {
-      const languageFile = await languageFiles[locale];
-      if (!languageFile) {
-        // eslint-disable-next-line no-console
-        console.error(`Unable to load locale: ${locale}`);
-        return string;
-      }
-      if (typeof languageFile[string] === 'string') {
-        return languageFile[string];
-      }
+  return getTranslatedString(string, locale).then((rawString) => {
+    if (!args) {
+      return rawString;
     }
-    return string;
-  };
 
-  const rawString = await getTranslatedString();
+    let finalString = rawString;
+    Object.entries(args).forEach(([key, value]) => {
+      finalString = finalString.replace(`{${key}}`, value);
+    });
 
-  let finalString = rawString;
-  Object.entries(args).forEach(([key, value]) => {
-    finalString = finalString.replace(`{${key}}`, value);
+    return finalString;
   });
-
-  return finalString;
-};
+}
